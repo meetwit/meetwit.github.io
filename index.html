@@ -1,13 +1,255 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<title>test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一夜狼人杀-破晓--主持人</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        h2 {
+            margin-top: 20px;
+        }
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 80%;
+            max-width: 600px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+        }
+        #timeShowAreaContainer {
+            display: inline-block;
+            margin-top: 20px;
+        }
+        #timeShowArea {
+            border: 1px solid black;
+            padding: 10px;
+            color: red;
+            font-size: 20px;
+            vertical-align: middle;
+        }
+        #timeShowAreaLabel {
+            padding: 10px;
+            font-size: 20px;
+            vertical-align: middle;
+        }
+        label {
+            display: inline-block;
+            margin-top: 20px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
+<h2>一夜狼人杀-破晓--主持人</h2>
 
-<h1>我的第一个标题</h1>
-<p>我的第一个段落。</p>
+<table id="rolesTable"></table>
 
+<div id="countdownCheckboxContainer">
+    <label for="countdownCheckbox">是否播报倒计时:</label>
+    <input type="checkbox" id="countdownCheckbox" checked>
+</div>
+
+<br />
+
+<button id="startGameBtn">开始游戏</button>
+
+<br />
+
+<div id="timeShowAreaContainer">
+    <label for="timeShowArea" id="timeShowAreaLabel">倒计时:</label>
+    <label id="timeShowArea">0</label>
+</div>
+
+<script>
+    const data = [
+        {
+            "角色": "模仿者",
+            "是否播报": true,
+            "开始操作内容": "模仿者请睁眼，翻开牌堆中的一张，记住这张牌，你变成了这个角色，后续按照这个角色进行操作。",
+            "中间倒计时时长": 6,
+            "结束操作内容": "模仿者请闭眼"
+        },
+        {
+            "角色": "狼人",
+            "是否播报": true,
+            "开始操作内容": "狼人请睁眼，查看狼同伴。",
+            "中间倒计时时长": 6,
+            "结束操作内容": "狼人请闭眼"
+        },
+        {
+            "角色": "狼先知",
+            "是否播报": true,
+            "开始操作内容": "狼先知请睁眼，查看其它一位玩家的身份牌。查看完另外一名玩家的身份后，如果场上你是独狼，你可以额外查看牌堆的一张牌。",
+            "中间倒计时时长": 6,
+            "结束操作内容": "狼人请闭眼"
+        },
+        {
+            "角色": "爪牙",
+            "是否播报": true,
+            "开始操作内容": "爪牙请睁眼，狼人竖起大拇指，爪牙寻找狼人。",
+            "中间倒计时时长": 6,
+            "结束操作内容": "狼人请放下大拇指，爪牙请闭眼"
+        },
+        {
+            "角色": "守夜人",
+            "是否播报": true,
+            "开始操作内容": "守夜人请睁眼，寻找一起守夜的人，互相确认守夜人身份。互相确认守夜人身份。",
+            "中间倒计时时长": 6,
+            "结束操作内容": "守夜人请闭眼"
+        },
+        {
+            "角色": "预言家",
+            "是否播报": true,
+            "开始操作内容": "预言家请睁眼，检查其他一位玩家的身份牌或者查看牌堆的两张牌。",
+            "中间倒计时时长": 6,
+            "结束操作内容": "预言家请闭眼"
+        },
+        {
+            "角色": "见习预言家",
+            "是否播报": true,
+            "开始操作内容": "见习预言家请睁眼，查看牌堆的其中一张牌。",
+            "中间倒计时时长": 6,
+            "结束操作内容": "见习预言家请闭眼"
+        },
+        {
+            "角色": "灵异侦探",
+            "是否播报": true,
+            "开始操作内容": "灵异侦探请睁眼，依次查看两位玩家的身份牌，如果查看到狼人或者皮匠，立即变身狼人或者皮匠，并立即闭眼。依次查看两位玩家的身份牌，如果查看到狼人或者皮匠，立即变身狼人或者皮匠，并立即闭眼。",
+            "中间倒计时时长": 6,
+            "结束操作内容": "灵异侦探请闭眼"
+        },
+        {
+            "角色": "强盗",
+            "是否播报": true,
+            "开始操作内容": "强盗请睁眼，查看其它一位玩家的身份牌，并与自己的身份牌交换",
+            "中间倒计时时长": 6,
+            "结束操作内容": "强盗请闭眼"
+        },
+        {
+            "角色": "女巫",
+            "是否播报": true,
+            "开始操作内容": "女巫请睁眼，查看牌堆的一张牌，并与场上任意一位玩家的身份牌交换，也可以和自己的牌交换。",
+            "中间倒计时时长": 6,
+            "结束操作内容": "女巫请闭眼"
+        },
+        {
+            "角色": "捣蛋鬼",
+            "是否播报": true,
+            "开始操作内容": "捣蛋鬼请睁眼，交换其它两位玩家的身份牌。交换的不可以是自己的牌。",
+            "中间倒计时时长": 6,
+            "结束操作内容": "捣蛋鬼请闭眼"
+        },
+        {
+            "角色": "失眠者",
+            "是否播报": true,
+            "开始操作内容": "失眠者请睁眼，再次检查自己的身份牌，再次检查自己的身份牌，再次检查自己的身份牌。",
+            "中间倒计时时长": 6,
+            "结束操作内容": "失眠者请闭眼"
+        },
+        {
+            "角色": "村民",
+            "是否播报": false,
+            "开始操作内容": "无",
+            "中间倒计时时长": 6,
+            "结束操作内容": "无"
+        }
+    ];
+
+    const rolesTable = document.getElementById('rolesTable');
+
+    data.forEach((role, index) => {
+        if (index % 3 === 0) {
+            tr = rolesTable.insertRow();
+        }
+        var td = tr.insertCell();
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = role.角色;
+        td.appendChild(document.createTextNode(role.角色));
+        td.appendChild(checkbox);
+    });
+
+    document.getElementById('startGameBtn').addEventListener('click', startGame);
+
+    function startGame() {
+        speak("天黑了，所有玩家请闭眼");
+        document.getElementById('startGameBtn').disabled = true;
+        const checkedRoles = Array.from(document.querySelectorAll('#rolesTable input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
+        const isCountdownVoiceEnabled = document.getElementById('countdownCheckbox').checked;
+        executeRole(checkedRoles, 0, isCountdownVoiceEnabled);
+    }
+
+    function executeRole(roles, index, isCountdownVoiceEnabled) {
+        if (index >= roles.length) {
+            document.getElementById('timeShowArea').innerText = "0";
+            speak("天亮了，所有玩家请挪动一下自己的手牌位置；然后请睁眼；开始推理游戏吧");
+            document.getElementById('startGameBtn').disabled = false;
+            return;
+        }
+
+        const role = roles[index];
+        const roleInfo = data.find(item => item.角色 === role);
+
+        if (roleInfo.是否播报) {
+            speak(roleInfo.开始操作内容);
+
+            speakCountdown(roleInfo.中间倒计时时长, isCountdownVoiceEnabled, () => {
+                speak(roleInfo.结束操作内容);
+                executeRole(roles, index + 1, isCountdownVoiceEnabled);
+            });
+        } else {
+            executeRole(roles, index + 1, isCountdownVoiceEnabled);
+        }
+    }
+
+    function speak(text, callback) {
+        const speech = new SpeechSynthesisUtterance(text);
+        speech.onend = callback;
+        speechSynthesis.speak(speech);
+    }
+
+    function speakCountdown(duration, isCountdownVoiceEnabled, callback) {
+        if (duration <= 0) {
+            callback();
+        } else {
+            if (isCountdownVoiceEnabled) {
+                speak_string = duration.toString()
+            } else {
+                speak_string = ""
+            }
+            outputTime(duration.toString());
+            speak(speak_string, () => {
+                setTimeout(() => {
+                    speakCountdown(duration - 1, isCountdownVoiceEnabled, callback);
+                }, 1000);
+            });
+        }
+    }
+
+    function outputTime(text) {
+        document.getElementById('timeShowArea').innerText = text;
+    }
+</script>
 </body>
 </html>
