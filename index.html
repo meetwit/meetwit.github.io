@@ -192,21 +192,25 @@
 
     const rolesTable = document.getElementById('rolesTable');
 
-    data.forEach((role, index) => {
-        if (index % 3 === 0) {
-            tr = rolesTable.insertRow();
-        }
-        var td = tr.insertCell();
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.value = role.角色;
+    function loadRolesFromLocalStorage() {
+        const savedRoles = JSON.parse(localStorage.getItem('rolesConfig')) || data;
 
-        // 添加 change 事件监听器
-        checkbox.addEventListener('change', saveConfig);
+        savedRoles.forEach((role, index) => {
+            if (index % 3 === 0) {
+                tr = rolesTable.insertRow();
+            }
+            var td = tr.insertCell();
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = role.角色;
 
-        td.appendChild(document.createTextNode(role.角色));
-        td.appendChild(checkbox);
-    });
+            // 添加 change 事件监听器
+            checkbox.addEventListener('change', saveConfig);
+
+            td.appendChild(document.createTextNode(role.角色));
+            td.appendChild(checkbox);
+        });
+    }
 
     document.getElementById('startGameBtn').addEventListener('click', startGame);
 
@@ -293,6 +297,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         loadConfig();
+        loadRolesFromLocalStorage(); // 新增：加载角色配置
     });
 </script>
 </body>
