@@ -140,13 +140,6 @@
             "结束操作内容": "灵异侦探请闭眼"
         },
         {
-            "角色": "强盗",
-            "是否播报": true,
-            "开始操作内容": "强盗请睁眼，查看其它一位玩家的身份牌，并与自己的身份牌交换",
-            "中间倒计时时长": 3,
-            "结束操作内容": "强盗请闭眼"
-        },
-        {
             "角色": "大强盗",
             "是否播报": true,
             "开始操作内容": "大强盗请睁眼，查看其它一位玩家的身份牌，并与自己的身份牌交换",
@@ -192,56 +185,26 @@
 
     const rolesTable = document.getElementById('rolesTable');
 
-    function loadRolesFromLocalStorage() {
-        const savedRoles = JSON.parse(localStorage.getItem('rolesConfig')) || data;
-
-        savedRoles.forEach((role, index) => {
-            if (index % 3 === 0) {
-                tr = rolesTable.insertRow();
-            }
-            var td = tr.insertCell();
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.value = role.角色;
-
-            // 添加 change 事件监听器
-            checkbox.addEventListener('change', saveConfig);
-
-            td.appendChild(document.createTextNode(role.角色));
-            td.appendChild(checkbox);
-        });
-    }
+    data.forEach((role, index) => {
+        if (index % 3 === 0) {
+            tr = rolesTable.insertRow();
+        }
+        var td = tr.insertCell();
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = role.角色;
+        td.appendChild(document.createTextNode(role.角色));
+        td.appendChild(checkbox);
+    });
 
     document.getElementById('startGameBtn').addEventListener('click', startGame);
 
     function startGame() {
         speak("天黑了，所有玩家请闭眼");
         document.getElementById('startGameBtn').disabled = true;
-
+        const checkedRoles = Array.from(document.querySelectorAll('#rolesTable input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
         const isCountdownVoiceEnabled = document.getElementById('countdownCheckbox').checked;
         executeRole(checkedRoles, 0, isCountdownVoiceEnabled);
-    }
-
-    function saveConfig() {
-        // 获取所有勾选的角色
-        const checkedRoles = Array.from(document.querySelectorAll('#rolesTable input[type="checkbox"]:checked'))
-                                .map(checkbox => checkbox.value);
-
-        // 保存勾选的角色到 localStorage
-        localStorage.setItem('checkedRoles', JSON.stringify(checkedRoles));
-    }
-
-    function loadConfig() {
-        // 从 localStorage 中读取勾选的角色
-        const savedCheckedRoles = JSON.parse(localStorage.getItem('checkedRoles')) || [];
-
-        // 自动勾选保存的角色
-        savedCheckedRoles.forEach(role => {
-            const checkbox = document.querySelector(`#rolesTable input[type="checkbox"][value="${role}"]`);
-            if (checkbox) {
-                checkbox.checked = true;
-            }
-        });
     }
 
     function executeRole(roles, index, isCountdownVoiceEnabled) {
@@ -294,11 +257,6 @@
     function outputTime(text) {
         document.getElementById('timeShowArea').innerText = text;
     }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        loadConfig();
-        loadRolesFromLocalStorage(); // 新增：加载角色配置
-    });
 </script>
 </body>
 </html>
