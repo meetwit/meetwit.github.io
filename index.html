@@ -200,6 +200,10 @@
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.value = role.角色;
+
+        // 添加 change 事件监听器
+        checkbox.addEventListener('change', saveConfig);
+
         td.appendChild(document.createTextNode(role.角色));
         td.appendChild(checkbox);
     });
@@ -210,15 +214,30 @@
         speak("天黑了，所有玩家请闭眼");
         document.getElementById('startGameBtn').disabled = true;
 
+        const isCountdownVoiceEnabled = document.getElementById('countdownCheckbox').checked;
+        executeRole(checkedRoles, 0, isCountdownVoiceEnabled);
+    }
+
+    function saveConfig() {
         // 获取所有勾选的角色
         const checkedRoles = Array.from(document.querySelectorAll('#rolesTable input[type="checkbox"]:checked'))
                                 .map(checkbox => checkbox.value);
 
         // 保存勾选的角色到 localStorage
         localStorage.setItem('checkedRoles', JSON.stringify(checkedRoles));
+    }
 
-        const isCountdownVoiceEnabled = document.getElementById('countdownCheckbox').checked;
-        executeRole(checkedRoles, 0, isCountdownVoiceEnabled);
+    function loadConfig() {
+        // 从 localStorage 中读取勾选的角色
+        const savedCheckedRoles = JSON.parse(localStorage.getItem('checkedRoles')) || [];
+
+        // 自动勾选保存的角色
+        savedCheckedRoles.forEach(role => {
+            const checkbox = document.querySelector(`#rolesTable input[type="checkbox"][value="${role}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+        });
     }
 
     function executeRole(roles, index, isCountdownVoiceEnabled) {
@@ -273,16 +292,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        // 从 localStorage 中读取勾选的角色
-        const savedCheckedRoles = JSON.parse(localStorage.getItem('checkedRoles')) || [];
-
-        // 自动勾选保存的角色
-        savedCheckedRoles.forEach(role => {
-            const checkbox = document.querySelector(`#rolesTable input[type="checkbox"][value="${role}"]`);
-            if (checkbox) {
-                checkbox.checked = true;
-            }
-        });
+        loadConfig();
     });
 </script>
 </body>
